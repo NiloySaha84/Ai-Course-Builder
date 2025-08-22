@@ -3,6 +3,7 @@ import dotenv from "dotenv"
 import { buildCourse } from "./service.mjs"
 import PDFDocument from 'pdfkit'
 import fs from 'fs'
+import { marked } from "marked";
 dotenv.config();
 
 const app = express();
@@ -17,7 +18,8 @@ app.post("/submit", async (req, res) => {
     const topic = req.body["topic"];
     if (!topic) { return res.status(400).send("Topic is missing.") }
     const { courseText, videosByModule } = await buildCourse(topic);
-    res.render("index.ejs", { courseContent: courseText, videosByModule });
+    const htmlContent = marked.parse(courseText);
+    res.render("index.ejs", { courseContent: htmlContent, videosByModule });
 })
 
 app.get("/", async (req, res) => {
