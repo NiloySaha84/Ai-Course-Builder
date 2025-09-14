@@ -1,51 +1,227 @@
 <!DOCTYPE html>
-<html>
-  <head>
+<html lang="en">
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>CourseCrafter AI</title>
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <title>CourseCrafter AI - Generate AI-Powered Courses</title>
+    <meta name="description" content="Create comprehensive educational courses on any topic using AI. Get structured lessons, learning objectives, and relevant video content.">
+    <meta name="keywords" content="AI course generator, online learning, education, course creator">
+    
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ai-course-builder.onrender.com/">
+    <meta property="og:title" content="CourseCrafter AI - Generate AI-Powered Courses">
+    <meta property="og:description" content="Create comprehensive educational courses on any topic using AI.">
+    
+    
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="CourseCrafter AI">
+    <meta property="twitter:description" content="Generate AI-powered educational courses instantly.">
+    
+    
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+    
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
-  </head>
-  <body>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
-      <div>
-          <h1>CourseCrafter AI</h1>
-      </div>
+        <div class="container">
+            <div class="d-flex align-items-center">
+                <span style="font-size: 1.8rem; margin-right: 0.5rem;">🎓</span>
+                <h1 class="mb-0">CourseCrafter AI</h1>
+            </div>
+        </div>
     </nav>
 
-    <div class="container mt-5">
-      <form method="POST" action="/submit" class="form-section">
-        <div class="center-container">
-            <input type="text" class="form-control" id="topicBar" name="topic" placeholder="Enter Topic">
-        </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-      </form>
-
-      <h3 class="n" style="padding-top: 50px;">Generated Course</h3>
-      <pre class="course-content"><%- courseContent %></pre>
-
-
-      <h2 style="padding-top: 50px;">Relevant Videos</h2>
-      <% for (const module in videosByModule) { %>
-        <div class="videos-section">
-          <h3><%= module %></h3>
-          <% videosByModule[module].forEach(video => { %>
-            <div>
-              <h4><%= video.title %> - <%= video.channel %></h4>
-              <iframe width="560" height="315"
-                      src="<%= video.embedUrl %>"
-                      frameborder="0" allowfullscreen>
-              </iframe>
+    
+    <div class="container">
+        
+        <section class="form-section">
+            <div class="text-center mb-4">
+                <h2 class="h3 text-primary mb-2">Generate Your AI Course</h2>
+                <p class="text-muted">Enter any topic and get a comprehensive, structured course with relevant videos</p>
             </div>
-          <% }) %>
-        </div>
-      <% } %>
+            
+            <form method="POST" action="/submit" id="courseForm">
+                <div class="row">
+                    <div class="col-md-8">
+                        <input type="text" 
+                               class="form-control" 
+                               id="topicBar" 
+                               name="topic" 
+                               placeholder="e.g., Machine Learning, Digital Marketing, Python Programming..."
+                               value="<%= typeof topic !== 'undefined' ? topic : '' %>"
+                               required
+                               maxlength="200"
+                               autocomplete="off">
+                        <div class="form-text">Be specific for better results (3-200 characters)</div>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <span class="btn-text">Generate Course</span>
+                            <span class="btn-loading d-none">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Generating...
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+            
+            
+            <% if (typeof success !== 'undefined' && success) { %>
+                <div class="alert alert-success mt-3">
+                    <strong>Success!</strong> <%= success %>
+                </div>
+            <% } %>
+            
+            <% if (typeof error !== 'undefined' && error) { %>
+                <div class="alert alert-danger mt-3">
+                    <strong>Error:</strong> <%= error %>
+                </div>
+            <% } %>
+        </section>
+
+        
+        <section>
+            <h2 class="section-header">Generated Course</h2>
+            <div class="course-content">
+                <%- courseContent %>
+            </div>
+        </section>
+
+        
+        <% if (typeof videosByModule !== 'undefined' && Object.keys(videosByModule).length > 0) { %>
+            <section>
+                <h2 class="section-header">Relevant Learning Videos</h2>
+                <% for (const module in videosByModule) { %>
+                    <% if (videosByModule[module].length > 0) { %>
+                        <div class="videos-section">
+                            <h3><%= module %></h3>
+                            <div class="row">
+                                <% videosByModule[module].forEach(video => { %>
+                                    <div class="col-lg-6 mb-4">
+                                        <div class="video-item">
+                                            <h4><%= video.title %></h4>
+                                            <div class="channel-name mb-3">Channel: <%= video.channel %></div>
+                                            <div class="ratio ratio-16x9">
+                                                <iframe data-src="<%= video.embedUrl %>" 
+                                                        title="<%= video.title %>"
+                                                        allowfullscreen
+                                                        loading="lazy"></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        </div>
+                    <% } %>
+                <% } %>
+            </section>
+        <% } %>
+
+        
+        <footer class="text-center py-4 mt-5">
+            <div class="text-muted">
+                <p class="mb-2">Built with ❤️ using OpenAI GPT and YouTube API</p>
+                <p class="mb-0">
+                    <small>
+                        <a href="https://github.com/yourusername/ai-course-builder" target="_blank" class="text-decoration-none">
+                            View on GitHub
+                        </a>
+                        |
+                        <a href="/health" target="_blank" class="text-decoration-none">
+                            System Status
+                        </a>
+                    </small>
+                </p>
+            </div>
+        </footer>
     </div>
 
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
-    <script src="" async defer></script>
-  </body>
+    
+    <script>
+        
+        document.getElementById('courseForm').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const btnLoading = submitBtn.querySelector('.btn-loading');
+            
+            
+            btnText.classList.add('d-none');
+            btnLoading.classList.remove('d-none');
+            submitBtn.disabled = true;
+            
+            
+            setTimeout(() => {
+                if (submitBtn.disabled) {
+                    btnText.classList.remove('d-none');
+                    btnLoading.classList.add('d-none');
+                    submitBtn.disabled = false;
+                }
+            }, 60000); 
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const topicInput = document.getElementById('topicBar');
+            if (topicInput && !topicInput.value) {
+                topicInput.focus();
+            }
+        });
+
+        
+        document.getElementById('topicBar').addEventListener('input', function(e) {
+            const current = e.target.value.length;
+            const max = 200;
+            const formText = e.target.nextElementSibling;
+            
+            if (current > 180) {
+                formText.textContent = `${current}/${max} characters`;
+                formText.className = 'form-text text-warning';
+            } else {
+                formText.textContent = 'Be specific for better results (3-200 characters)';
+                formText.className = 'form-text';
+            }
+        });
+
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const courseContent = document.querySelector('.course-content');
+            if (courseContent && courseContent.textContent.trim() !== 'Enter a topic above to generate your AI-powered course!') {
+                setTimeout(() => {
+                    courseContent.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }, 500);
+            }
+        });
+
+        
+        if ('IntersectionObserver' in window) {
+            const videoObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const iframe = entry.target;
+                        if (iframe.dataset.src) {
+                            iframe.src = iframe.dataset.src;
+                            iframe.removeAttribute('data-src');
+                            videoObserver.unobserve(iframe);
+                        }
+                    }
+                });
+            });
+
+            document.querySelectorAll('iframe[data-src]').forEach(iframe => {
+                videoObserver.observe(iframe);
+            });
+        }
+    </script>
+</body>
 </html>
